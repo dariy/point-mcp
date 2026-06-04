@@ -51,7 +51,7 @@ func Load(files ...string) (*Config, error) {
 
 	httpAddr := os.Getenv("POINT_MCP_HTTP_ADDR")
 	if httpAddr == "" {
-		httpAddr = ":9000"
+		httpAddr = ":8000"
 	}
 
 	return &Config{
