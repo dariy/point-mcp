@@ -13,6 +13,7 @@ import (
 	"syscall"
 
 	"github.com/dariy/point-mcp/internal/config"
+	"github.com/dariy/point-mcp/internal/middleware"
 	"github.com/dariy/point-mcp/internal/point"
 	"github.com/dariy/point-mcp/internal/prompts"
 	"github.com/dariy/point-mcp/internal/resources"
@@ -91,7 +92,11 @@ func main() {
 	log.Printf("server initialized: tools, resources, and prompts registered")
 
 	if httpAddr != "" {
-		handler := mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return srv }, nil)
+		if len(cfg.AuthTokens) == 0 {
+			log.Fatal("MCP_AUTH_TOKENS must be set when running in HTTP mode")
+		}
+		var handler http.Handler = mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return srv }, nil)
+		handler = middleware.BearerAuth(cfg.AuthTokens, handler)
 		httpSrv := &http.Server{Addr: httpAddr, Handler: handler}
 		go func() {
 			<-ctx.Done()

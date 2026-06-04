@@ -9,11 +9,12 @@ import (
 )
 
 type Config struct {
-	BaseURL   string
-	APIKey    string
-	Transport string
-	HTTPAddr  string
-	LogFile   string
+	BaseURL    string
+	APIKey     string
+	Transport  string
+	HTTPAddr   string
+	LogFile    string
+	AuthTokens []string // MCP_AUTH_TOKENS — comma-separated, supports rotation
 }
 
 // Load reads configuration from environment variables, optionally pre-seeding
@@ -54,12 +55,23 @@ func Load(files ...string) (*Config, error) {
 	}
 
 	return &Config{
-		BaseURL:   baseURL,
-		APIKey:    apiKey,
-		Transport: transport,
-		HTTPAddr:  httpAddr,
-		LogFile:   os.Getenv("POINT_MCP_LOG_FILE"),
+		BaseURL:    baseURL,
+		APIKey:     apiKey,
+		Transport:  transport,
+		HTTPAddr:   httpAddr,
+		LogFile:    os.Getenv("POINT_MCP_LOG_FILE"),
+		AuthTokens: splitNonEmpty(os.Getenv("MCP_AUTH_TOKENS")),
 	}, nil
+}
+
+func splitNonEmpty(s string) []string {
+	var out []string
+	for _, p := range strings.Split(s, ",") {
+		if t := strings.TrimSpace(p); t != "" {
+			out = append(out, t)
+		}
+	}
+	return out
 }
 
 // loadDotEnv reads KEY=VALUE pairs from path into the process environment.
