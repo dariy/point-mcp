@@ -23,6 +23,7 @@ The server is configured via environment variables, which can also be provided i
 | `POINT_MCP_TRANSPORT` | Transport method for MCP: `stdio` or `http`. | `stdio` |
 | `POINT_MCP_HTTP_ADDR` | Listen address when using `http` transport. | `:9000` |
 | `POINT_MCP_LOG_FILE` | Optional path to a file where logs should be written. | - |
+| `MCP_AUTH_TOKENS` | **Required in HTTP mode**. Comma-separated bearer tokens for client authentication. Supports multiple tokens for zero-downtime rotation. | - |
 
 ## Installation
 
@@ -40,6 +41,27 @@ Run the provided build script to compile the binary:
 
 This will create a `point-mcp` binary in the root directory.
 
+### Docker
+
+Pre-built images are published to the GitHub Container Registry on every push to `main`:
+
+```bash
+docker pull ghcr.io/dariy/point-mcp:main
+```
+
+Run with Docker:
+
+```bash
+docker run -d --restart unless-stopped \
+  -p 127.0.0.1:9000:9000 \
+  -e POINT_MCP_TRANSPORT=http \
+  -e POINT_MCP_HTTP_ADDR=0.0.0.0:9000 \
+  -e MCP_AUTH_TOKENS=your-secret-token \
+  -e POINT_BASE_URL=https://your-point-instance.com \
+  -e POINT_API_KEY=your-api-key \
+  ghcr.io/dariy/point-mcp:main
+```
+
 ## Usage
 
 ### Running as an MCP Server (stdio)
@@ -52,10 +74,48 @@ This is the default mode, typically used when connecting the server to an MCP-co
 
 ### Running as an MCP Server (HTTP)
 
-To start the server using the streamable-HTTP transport:
+To start the server using the streamable-HTTP transport, `MCP_AUTH_TOKENS` must be set. Generate a token with `openssl rand -hex 32`.
 
 ```bash
-POINT_MCP_TRANSPORT=http ./point-mcp
+POINT_MCP_TRANSPORT=http MCP_AUTH_TOKENS=your-secret-token ./point-mcp
+```
+
+All HTTP requests must include an `Authorization: Bearer <token>` header. The server rejects unauthenticated requests with `401 Unauthorized`.
+
+**Token rotation** (zero-downtime): set multiple comma-separated tokens, update clients one by one, then remove the old token.
+
+```bash
+MCP_AUTH_TOKENS=old-token,new-token  # both accepted during rotation
+```
+
+### Connecting Claude or Gemini
+
+Configure your MCP client to use the server's URL with a bearer token header.
+
+**Claude Code** (`~/.claude/settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "point-mcp": {
+      "type": "sse",
+      "url": "https://mcp.example.com/",
+      "headers": { "Authorization": "Bearer your-secret-token" }
+    }
+  }
+}
+```
+
+**Gemini**:
+
+```json
+{
+  "servers": [{
+    "name": "point-mcp",
+    "url": "https://mcp.example.com/",
+    "headers": { "Authorization": "Bearer your-secret-token" }
+  }]
+}
 ```
 
 ### Running as a CLI Tool
