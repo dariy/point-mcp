@@ -1,17 +1,17 @@
 FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS builder
-ARG TARGETOS=linux
-ARG TARGETARCH=amd64
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
+ARG TARGETOS
+ARG TARGETARCH
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -ldflags="-s -w" \
     -trimpath \
     -o /point-mcp ./cmd/point-mcp
 
 # Fetch CA certificates for outbound HTTPS calls to the Point API
-FROM alpine:3.22 AS certs
+FROM --platform=$BUILDPLATFORM alpine:3.22 AS certs
 RUN apk add --no-cache ca-certificates
 
 FROM scratch

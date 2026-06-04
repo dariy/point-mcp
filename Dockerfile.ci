@@ -4,7 +4,7 @@
 #   CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o point-mcp-arm64 ./cmd/point-mcp
 
 FROM --platform=$BUILDPLATFORM alpine:3.22 AS binary
-ARG TARGETARCH=amd64
+ARG TARGETARCH
 COPY point-mcp-amd64 point-mcp-arm64 /tmp/
 RUN cp /tmp/point-mcp-${TARGETARCH} /point-mcp
 
