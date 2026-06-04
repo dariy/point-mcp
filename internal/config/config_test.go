@@ -56,8 +56,8 @@ func TestLoad_defaults(t *testing.T) {
 	if cfg.Transport != "stdio" {
 		t.Errorf("expected transport=stdio, got %q", cfg.Transport)
 	}
-	if cfg.HTTPAddr != ":9000" {
-		t.Errorf("expected httpAddr=:9000, got %q", cfg.HTTPAddr)
+	if cfg.HTTPAddr != ":8000" {
+		t.Errorf("expected httpAddr=:8000, got %q", cfg.HTTPAddr)
 	}
 }
 
