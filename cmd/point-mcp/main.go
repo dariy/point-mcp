@@ -95,9 +95,18 @@ func main() {
 		if len(cfg.AuthTokens) == 0 {
 			log.Fatal("MCP_AUTH_TOKENS must be set when running in HTTP mode")
 		}
-		var handler http.Handler = mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return srv }, nil)
-		handler = middleware.BearerAuth(cfg.AuthTokens, handler)
-		httpSrv := &http.Server{Addr: httpAddr, Handler: handler}
+		mcpHandler := mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return srv }, nil)
+		handler := middleware.BearerAuth(cfg.AuthTokens, mcpHandler)
+
+		// Add a /health endpoint that doesn't require authentication
+		mux := http.NewServeMux()
+		mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("ok"))
+		})
+		mux.Handle("/", handler)
+
+		httpSrv := &http.Server{Addr: httpAddr, Handler: mux}
 		go func() {
 			<-ctx.Done()
 			_ = httpSrv.Close()
