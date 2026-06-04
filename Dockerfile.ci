@@ -3,13 +3,15 @@
 #   CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o point-mcp-amd64 ./cmd/point-mcp
 #   CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o point-mcp-arm64 ./cmd/point-mcp
 
+FROM --platform=$BUILDPLATFORM alpine:3.22 AS binary
 ARG TARGETARCH=amd64
+COPY point-mcp-amd64 point-mcp-arm64 /tmp/
+RUN cp /tmp/point-mcp-${TARGETARCH} /point-mcp
 
-FROM alpine:3.22 AS certs
+FROM --platform=$BUILDPLATFORM alpine:3.22 AS certs
 RUN apk add --no-cache ca-certificates
 
 FROM scratch
-ARG TARGETARCH
+COPY --from=binary /point-mcp /point-mcp
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY point-mcp-${TARGETARCH} /point-mcp
 ENTRYPOINT ["/point-mcp"]
