@@ -144,34 +144,61 @@ type MediaAnalysis struct {
 
 // TagDetail is the full tag object returned by the tags API endpoints.
 type TagDetail struct {
+	ID            int64        `json:"id"`
 	Name          string       `json:"name"`
 	Slug          string       `json:"slug"`
+	Description   *string      `json:"description"`
+	CustomURL     *string      `json:"custom_url"`
+	SortOrder     *int64       `json:"sort_order"`
 	PostCount     int64        `json:"post_count"`
-	IsHiddenPosts *bool        `json:"is_hidden_posts,omitempty"`
-	Parent        *TagSummary  `json:"parent,omitempty"`
-	Children      []TagSummary `json:"children,omitempty"`
+	IsSystem      bool         `json:"is_system"`
+	IsHidden      bool         `json:"is_hidden"`
+	IsHiddenPosts bool         `json:"is_hidden_posts"`
+	IsRelated     bool         `json:"is_related"`
+	InBreadcrumbs bool         `json:"in_breadcrumbs"`
+	NoAncestors   bool         `json:"no_ancestors"`
+	Parents       []TagSummary `json:"parents"`
+	Children      []TagSummary `json:"children"`
+	Locations     []TagLocation `json:"locations"`
 }
 
-// TagSummary is a simplified tag object used in parent/children fields to avoid recursion.
+// TagSummary is a simplified tag object used in parent/children fields.
 type TagSummary struct {
-	Name          string `json:"name"`
-	Slug          string `json:"slug"`
-	PostCount     int64  `json:"post_count"`
-	IsHiddenPosts *bool  `json:"is_hidden_posts,omitempty"`
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	Slug      string `json:"slug"`
+	PostCount int64  `json:"post_count"`
 }
 
-// CreateTagRequest is the body for POST /tags.
+// TagLocation represents a coordinate pair.
+type TagLocation struct {
+	ID        int64   `json:"id,omitempty"`
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
+// CreateTagRequest is the body for POST /api/tags.
 type CreateTagRequest struct {
-	Name       string `json:"name"`
-	ParentSlug string `json:"parent_slug,omitempty"`
+	Name        string        `json:"name"`
+	Slug        string        `json:"slug,omitempty"`
+	Description string        `json:"description,omitempty"`
+	CustomURL   string        `json:"custom_url,omitempty"`
+	SortOrder   *int32        `json:"sort_order,omitempty"`
+	ParentIDs   []int64       `json:"parent_ids,omitempty"`
+	ChildIDs    []int64       `json:"child_ids,omitempty"`
+	Locations   []TagLocation `json:"locations,omitempty"`
 }
 
-// UpdateTagRequest is the body for PUT /tags/:slug.
+// UpdateTagRequest is the body for PUT /api/tags/:id.
 type UpdateTagRequest struct {
-	Name          string  `json:"name,omitempty"`
-	Slug          string  `json:"slug,omitempty"`
-	ParentSlug    *string `json:"parent_slug,omitempty"`
-	IsHiddenPosts *bool   `json:"is_hidden_posts,omitempty"`
+	Name        string        `json:"name,omitempty"`
+	Slug        string        `json:"slug,omitempty"`
+	Description string        `json:"description,omitempty"`
+	CustomURL   string        `json:"custom_url,omitempty"`
+	SortOrder   *int32        `json:"sort_order,omitempty"`
+	ParentIDs   []int64       `json:"parent_ids,omitempty"`
+	ChildIDs    []int64       `json:"child_ids,omitempty"`
+	Locations   []TagLocation `json:"locations,omitempty"`
 }
 
 // StorageStats is the response from GET /media/storage-stats.
