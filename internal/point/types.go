@@ -144,10 +144,34 @@ type MediaAnalysis struct {
 
 // TagDetail is the full tag object returned by the tags API endpoints.
 type TagDetail struct {
+	Name          string       `json:"name"`
+	Slug          string       `json:"slug"`
+	PostCount     int64        `json:"post_count"`
+	IsHiddenPosts *bool        `json:"is_hidden_posts,omitempty"`
+	Parent        *TagSummary  `json:"parent,omitempty"`
+	Children      []TagSummary `json:"children,omitempty"`
+}
+
+// TagSummary is a simplified tag object used in parent/children fields to avoid recursion.
+type TagSummary struct {
 	Name          string `json:"name"`
 	Slug          string `json:"slug"`
 	PostCount     int64  `json:"post_count"`
 	IsHiddenPosts *bool  `json:"is_hidden_posts,omitempty"`
+}
+
+// CreateTagRequest is the body for POST /tags.
+type CreateTagRequest struct {
+	Name       string `json:"name"`
+	ParentSlug string `json:"parent_slug,omitempty"`
+}
+
+// UpdateTagRequest is the body for PUT /tags/:slug.
+type UpdateTagRequest struct {
+	Name          string  `json:"name,omitempty"`
+	Slug          string  `json:"slug,omitempty"`
+	ParentSlug    *string `json:"parent_slug,omitempty"`
+	IsHiddenPosts *bool   `json:"is_hidden_posts,omitempty"`
 }
 
 // StorageStats is the response from GET /media/storage-stats.
