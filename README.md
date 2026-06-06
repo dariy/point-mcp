@@ -27,11 +27,17 @@ The server is configured via environment variables, which can also be provided i
 
 ## Installation
 
-### Prerequisites
+The easiest way to install and configure the server is using the interactive setup wizard. It supports both Docker (recommended) and native Linux binary installations.
 
-- [Go](https://go.dev/) 1.26 or later.
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/dariy/point-mcp/main/install.sh)
+```
 
-### Build
+The wizard will guide you through connecting to your Point instance and generating the required configuration and authentication tokens.
+
+### Manual Installation (Native)
+
+**Prerequisites:** [Go](https://go.dev/) 1.26 or later.
 
 Run the provided build script to compile the binary:
 
@@ -41,7 +47,7 @@ Run the provided build script to compile the binary:
 
 This will create a `point-mcp` binary in the root directory.
 
-### Docker
+### Manual Installation (Docker)
 
 Pre-built images are published to the GitHub Container Registry on every push to `main`:
 
