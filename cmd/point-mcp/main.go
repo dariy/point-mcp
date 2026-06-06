@@ -94,7 +94,9 @@ func main() {
 	if httpAddr != "" {
 		mcpHandler := mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server { return srv }, nil)
 
-		oauthProvider := oauth.New(oauth.Config{})
+		oauthProvider := oauth.New(oauth.Config{
+			StaticTokens: cfg.AuthTokens,
+		})
 		mux := http.NewServeMux()
 		oauthProvider.Register(mux)
 		mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

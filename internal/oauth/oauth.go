@@ -19,6 +19,7 @@ import (
 type Config struct {
 	BaseURL         string
 	Password        string
+	StaticTokens    []string
 	AccessTokenTTL  time.Duration // default: 1 hour
 	RefreshTokenTTL time.Duration // 0 = never expires
 }
@@ -62,12 +63,16 @@ func New(cfg Config) *Provider {
 	if cfg.AccessTokenTTL == 0 {
 		cfg.AccessTokenTTL = time.Hour
 	}
-	return &Provider{
+	p := &Provider{
 		cfg:     cfg,
 		clients: make(map[string]*clientRecord),
 		codes:   make(map[string]*codeRecord),
 		tokens:  make(map[string]*tokenRecord),
 	}
+	for _, t := range cfg.StaticTokens {
+		p.tokens[t] = &tokenRecord{ClientID: "static"} // zero ExpiresAt = never expires
+	}
+	return p
 }
 
 // Register mounts all OAuth 2.1 and discovery endpoints onto mux.
